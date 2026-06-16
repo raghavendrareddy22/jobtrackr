@@ -41,7 +41,7 @@ export function SearchClient({ ready, aiReady }: { ready: boolean; aiReady: bool
   const router = useRouter();
   const [what, setWhat] = useState("");
   const [where, setWhere] = useState("");
-  const [count, setCount] = useState(10);
+  const count = 50;
   const [sources, setSources] = useState<string[]>(["adzuna", "remotive", "jobicy", "arbeitnow"]);
   const [last24h, setLast24h] = useState(true);
   const [searching, setSearching] = useState(false);
@@ -168,17 +168,6 @@ export function SearchClient({ ready, aiReady }: { ready: boolean; aiReady: bool
             </button>
           </div>
 
-          <div style={{ marginBottom: 20 }}>
-            <div className="caption" style={{ color: "var(--ink-muted)", fontWeight: 600, marginBottom: 8 }}>Results per search</div>
-            <select
-              className="input"
-              style={{ appearance: "none", fontSize: 13, padding: "6px 10px" }}
-              value={count}
-              onChange={(e) => setCount(Number(e.target.value))}
-            >
-              {[5, 10, 15, 20].map((n) => <option key={n} value={n}>{n} jobs</option>)}
-            </select>
-          </div>
 
           {!aiReady && (
             <div style={{ padding: "10px 12px", borderRadius: 8, background: "color-mix(in oklab,var(--surface-2),#c9621f 10%)", fontSize: 12, color: "#c9621f", lineHeight: 1.4 }}>
