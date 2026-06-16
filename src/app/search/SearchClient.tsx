@@ -8,15 +8,17 @@ type Found = { id: string; title: string; company: string; location?: string; so
 type Status = "pending" | "tailoring" | "done" | "error";
 
 const SOURCES = [
-  { id: "adzuna",   label: "Adzuna",   note: "needs API key" },
-  { id: "remotive", label: "Remotive", note: "free · remote" },
-  { id: "jobicy",   label: "Jobicy",   note: "free · remote" },
+  { id: "adzuna",    label: "Adzuna",    note: "needs API key" },
+  { id: "remotive",  label: "Remotive",  note: "free · remote" },
+  { id: "jobicy",    label: "Jobicy",    note: "free · remote" },
+  { id: "arbeitnow", label: "Arbeitnow", note: "free · global" },
 ];
 
 const SOURCE_COLOR: Record<string, string> = {
-  adzuna:   "#5e6ad2",
-  remotive: "#27a6a4",
-  jobicy:   "#a084dc",
+  adzuna:    "#5e6ad2",
+  remotive:  "#27a6a4",
+  jobicy:    "#a084dc",
+  arbeitnow: "#e86c3a",
 };
 
 function Avatar({ name, size = 40 }: { name: string; size?: number }) {
@@ -40,7 +42,8 @@ export function SearchClient({ ready, aiReady }: { ready: boolean; aiReady: bool
   const [what, setWhat] = useState("");
   const [where, setWhere] = useState("");
   const [count, setCount] = useState(10);
-  const [sources, setSources] = useState<string[]>(["adzuna", "remotive", "jobicy"]);
+  const [sources, setSources] = useState<string[]>(["adzuna", "remotive", "jobicy", "arbeitnow"]);
+  const [last24h, setLast24h] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<(Found & { status: Status; score?: number })[]>([]);
@@ -65,7 +68,7 @@ export function SearchClient({ ready, aiReady }: { ready: boolean; aiReady: bool
     try {
       const res = await fetch("/api/search", {
         method: "POST",
-        body: JSON.stringify({ what, where, count, sources: activeSources }),
+        body: JSON.stringify({ what, where, count, sources: activeSources, last24h }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Search failed");
@@ -143,6 +146,26 @@ export function SearchClient({ ready, aiReady }: { ready: boolean; aiReady: bool
                 Add Adzuna key →
               </Link>
             )}
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <div className="caption" style={{ color: "var(--ink-muted)", fontWeight: 600, marginBottom: 8 }}>Date posted</div>
+            <button
+              onClick={() => setLast24h((v) => !v)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "8px 10px", borderRadius: 8, cursor: "pointer",
+                background: last24h ? "#5e6ad215" : "transparent",
+                border: "1px solid " + (last24h ? "#5e6ad260" : "var(--hairline)"),
+                width: "100%", textAlign: "left",
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: last24h ? "#5e6ad2" : "var(--hairline-strong)", flexShrink: 0 }} />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: last24h ? "#5e6ad2" : "var(--ink-muted)" }}>Last 24 hours</div>
+                <div style={{ fontSize: 11, color: "var(--ink-tertiary)" }}>{last24h ? "only fresh jobs" : "up to 3 days old"}</div>
+              </div>
+            </button>
           </div>
 
           <div style={{ marginBottom: 20 }}>

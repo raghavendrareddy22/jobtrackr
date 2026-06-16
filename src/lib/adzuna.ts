@@ -15,6 +15,7 @@ export async function searchAdzuna(opts: {
   what: string;
   where?: string;
   count?: number;
+  maxDaysOld?: number;
 }): Promise<AdzunaJob[]> {
   const s = await getSettings();
   if (!s.adzunaAppId || !s.adzunaAppKey) {
@@ -31,6 +32,7 @@ export async function searchAdzuna(opts: {
     "content-type": "application/json",
   });
   if (opts.where) params.set("where", opts.where);
+  if (opts.maxDaysOld) params.set("max_days_old", String(opts.maxDaysOld));
 
   const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1?${params.toString()}`;
   const res = await fetch(url);

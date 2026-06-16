@@ -20,6 +20,7 @@ type JobProps = {
 };
 
 type LogEntry = { id: string; type: string; body: string; createdAt: string };
+type ResumeData = { name: string; email: string; phone: string; location: string; summary: string; skills: string; experience: string };
 
 const LOG_TYPES = [
   { id: "email", label: "Email" },
@@ -149,9 +150,31 @@ export function JobDetailClient({ job, initialKit, hasResume }: { job: JobProps;
   }
 
   const appliedDays = job.appliedAt ? Math.floor((Date.now() - new Date(job.appliedAt).getTime()) / 86400000) : null;
+  const [showQuickApply, setShowQuickApply] = useState(false);
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+
+  async function openQuickApply() {
+    setShowQuickApply(true);
+    if (!resumeData) {
+      try {
+        const r = await fetch("/api/resume/master");
+        if (r.ok) setResumeData(await r.json());
+      } catch { /* silent */ }
+    }
+  }
 
   return (
     <div>
+      {showQuickApply && (
+        <QuickApplyPanel
+          resumeData={resumeData}
+          coverLetter={kit?.coverLetter ?? null}
+          jobTitle={head.title}
+          company={head.company}
+          jobUrl={job.url}
+          onClose={() => setShowQuickApply(false)}
+        />
+      )}
       <div className="job-detail-header flex items-start justify-between" style={{ marginTop: 8, marginBottom: 24 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           {!editing ? (
@@ -200,13 +223,20 @@ export function JobDetailClient({ job, initialKit, hasResume }: { job: JobProps;
               applied {appliedDays === 0 ? "today" : `${appliedDays}d ago`}
             </span>
           )}
+          <button
+            className="btn-secondary"
+            onClick={openQuickApply}
+            style={{ fontWeight: 600, borderColor: "var(--primary)", color: "var(--primary)" }}
+          >
+            ⚡ Quick Apply
+          </button>
           {job.url && (
             <button
               className="btn-primary"
               onClick={smartApply}
               title={kit?.coverLetter ? "Opens job URL + copies cover letter" : "Opens job URL"}
             >
-              {smartApplied ? "Opened ✓" : "Smart Apply"}
+              {smartApplied ? "Opened ✓" : "Open & Apply"}
             </button>
           )}
           {!editing ? (
@@ -575,6 +605,161 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <div style={{ marginBottom: 16 }}>
       <div style={{ fontSize: 11, letterSpacing: 1, textTransform: "uppercase", borderBottom: "1px solid #111", paddingBottom: 2, marginBottom: 8 }}>{title}</div>
       {children}
+    </div>
+  );
+}
+
+function QuickApplyPanel({
+  resumeData, coverLetter, jobTitle, company, jobUrl, onClose,
+}: {
+  resumeData: ResumeData | null;
+  coverLetter: string | null;
+  jobTitle: string;
+  company: string;
+  jobUrl: string | null;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState<string | null>(null);
+
+  function copy(key: string, text: string) {
+    navigator.clipboard.writeText(text).catch(() => {});
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1500);
+  }
+
+  const exp = resumeData?.experience ? (() => {
+    try { return JSON.parse(resumeData.experience); } catch { return []; }
+  })() : [];
+  const latest = exp[0] ?? {};
+  const skills = resumeData?.skills ? (() => {
+    try { return (JSON.parse(resumeData.skills) as string[]).join(", "); } catch { return ""; }
+  })() : "";
+
+  const fields = [
+    { key: "name",     label: "Full Name",       value: resumeData?.name ?? "" },
+    { key: "email",    label: "Email",            value: resumeData?.email ?? "" },
+    { key: "phone",    label: "Phone",            value: resumeData?.phone ?? "" },
+    { key: "location", label: "Location / City",  value: resumeData?.location ?? "" },
+    { key: "title",    label: "Current Job Title", value: latest.title ?? "" },
+    { key: "company",  label: "Current Company",  value: latest.company ?? "" },
+    { key: "skills",   label: "Skills",           value: skills },
+    { key: "summary",  label: "Professional Summary", value: resumeData?.summary ?? "" },
+  ];
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        display: "flex", alignItems: "flex-start", justifyContent: "flex-end",
+      }}
+    >
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)" }} />
+      <div
+        style={{
+          position: "relative", width: 420, height: "100vh", overflowY: "auto",
+          background: "var(--canvas)", borderLeft: "1px solid var(--hairline)",
+          boxShadow: "-4px 0 24px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column",
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--hairline)", display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: "var(--ink)" }}>⚡ Quick Apply</div>
+            <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 3 }}>
+              {jobTitle} · {company}
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ink-muted)", fontSize: 18, lineHeight: 1 }}>×</button>
+        </div>
+
+        {/* Instructions */}
+        <div style={{ padding: "12px 24px", background: "color-mix(in oklab,var(--surface-1),var(--primary) 5%)", borderBottom: "1px solid var(--hairline)" }}>
+          <div style={{ fontSize: 12, color: "var(--ink-muted)", lineHeight: 1.5 }}>
+            Click <strong>Copy</strong> next to each field, then paste it into the application form. Use the Chrome extension below for automatic filling.
+          </div>
+        </div>
+
+        {/* Open job link */}
+        {jobUrl && (
+          <div style={{ padding: "12px 24px", borderBottom: "1px solid var(--hairline)" }}>
+            <a href={jobUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: "inline-block", fontSize: 13, textDecoration: "none" }}>
+              Open Application →
+            </a>
+          </div>
+        )}
+
+        {/* Fields */}
+        <div style={{ flex: 1, padding: "16px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
+          {!resumeData && (
+            <div style={{ padding: 16, background: "var(--surface-2)", borderRadius: 8, fontSize: 13, color: "var(--ink-muted)" }}>
+              No resume on file. <Link href="/resume" style={{ color: "var(--primary)", textDecoration: "underline" }}>Upload your resume →</Link>
+            </div>
+          )}
+          {fields.map((f) => (
+            <div key={f.key} style={{ background: "var(--surface-1)", border: "1px solid var(--hairline)", borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-subtle)", textTransform: "uppercase", letterSpacing: 0.4 }}>{f.label}</span>
+                <button
+                  onClick={() => copy(f.key, f.value)}
+                  disabled={!f.value}
+                  style={{
+                    fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 6, cursor: f.value ? "pointer" : "not-allowed",
+                    background: copied === f.key ? "var(--success)" : "var(--primary)",
+                    color: "#fff", border: "none", opacity: f.value ? 1 : 0.4,
+                    transition: "background .15s",
+                  }}
+                >
+                  {copied === f.key ? "Copied ✓" : "Copy"}
+                </button>
+              </div>
+              <div style={{ fontSize: 13, color: f.value ? "var(--ink)" : "var(--ink-tertiary)", fontStyle: f.value ? "normal" : "italic", lineHeight: 1.4, wordBreak: "break-word" }}>
+                {f.value || "Not set — add to your resume"}
+              </div>
+            </div>
+          ))}
+
+          {/* Cover letter */}
+          {coverLetter && (
+            <div style={{ background: "color-mix(in oklab,var(--surface-1),var(--primary) 5%)", border: "1px solid var(--primary)40", borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--primary)", textTransform: "uppercase", letterSpacing: 0.4 }}>Cover Letter</span>
+                <button
+                  onClick={() => copy("cover", coverLetter)}
+                  style={{
+                    fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 6, cursor: "pointer",
+                    background: copied === "cover" ? "var(--success)" : "var(--primary)",
+                    color: "#fff", border: "none", transition: "background .15s",
+                  }}
+                >
+                  {copied === "cover" ? "Copied ✓" : "Copy"}
+                </button>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--ink-muted)", lineHeight: 1.5, maxHeight: 100, overflow: "hidden", maskImage: "linear-gradient(to bottom, black 60%, transparent)" }}>
+                {coverLetter}
+              </div>
+            </div>
+          )}
+          {!coverLetter && (
+            <div style={{ padding: 14, background: "var(--surface-2)", borderRadius: 10, fontSize: 12, color: "var(--ink-muted)", textAlign: "center" }}>
+              Generate a kit to get an AI cover letter for this job
+            </div>
+          )}
+        </div>
+
+        {/* Chrome extension promo */}
+        <div style={{ padding: "16px 24px", borderTop: "1px solid var(--hairline)", background: "var(--surface-1)" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>🔌 Auto-fill with Chrome extension</div>
+          <div style={{ fontSize: 11, color: "var(--ink-muted)", lineHeight: 1.5, marginBottom: 10 }}>
+            Install the JobTrackr extension to fill all fields automatically on LinkedIn, Indeed, Naukri and any other job site.
+          </div>
+          <Link
+            href="/extension-guide"
+            style={{ fontSize: 12, fontWeight: 600, color: "var(--primary)", textDecoration: "none" }}
+          >
+            How to install the extension →
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

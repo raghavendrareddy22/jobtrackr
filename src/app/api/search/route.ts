@@ -3,31 +3,57 @@ import { prisma } from "@/lib/db";
 import { searchAdzuna } from "@/lib/adzuna";
 import { searchRemotive } from "@/lib/remotive";
 import { searchJobicy } from "@/lib/jobicy";
+import { searchArbeitnow } from "@/lib/arbeitnow";
+
+type RawJob = {
+  externalId?: string;
+  title: string;
+  company: string;
+  location?: string;
+  url?: string;
+  description: string;
+  salary?: string;
+  source?: string;
+  postedAt?: Date;
+};
+
+const SOURCES_COUNT = 4;
 
 export async function POST(req: NextRequest) {
   try {
-    const { what, where, count, sources } = await req.json();
+    const { what, where, count, sources, last24h } = await req.json();
     if (!what || typeof what !== "string") {
       return NextResponse.json({ error: "Enter a role keyword" }, { status: 400 });
     }
 
     const perSource = Math.ceil((count ?? 10) / (sources?.length ?? 1));
-    const active: string[] = sources ?? ["adzuna"];
+    const active: string[] = sources ?? ["adzuna", "remotive", "jobicy", "arbeitnow"];
+    const hoursBack = last24h ? 24 : 72; // default 72h, strict 24h when toggled
 
     const results = await Promise.allSettled([
-      active.includes("adzuna") ? searchAdzuna({ what, where, count: perSource }) : Promise.resolve([]),
+      active.includes("adzuna") ? searchAdzuna({ what, where, count: perSource, maxDaysOld: last24h ? 1 : 3 }) : Promise.resolve([]),
       active.includes("remotive") ? searchRemotive(what, perSource) : Promise.resolve([]),
       active.includes("jobicy") ? searchJobicy(what, perSource) : Promise.resolve([]),
+      active.includes("arbeitnow") ? searchArbeitnow(what, perSource, hoursBack) : Promise.resolve([]),
     ]);
 
-    const allJobs = [
-      ...((results[0].status === "fulfilled" ? results[0].value : []) as { externalId?: string; title: string; company: string; location?: string; url?: string; description: string; salary?: string; source?: string }[]).map(j => ({ ...j, source: "adzuna" })),
-      ...((results[1].status === "fulfilled" ? results[1].value : []) as { externalId?: string; title: string; company: string; location?: string; url?: string; description: string; salary?: string; source?: string }[]).map(j => ({ ...j, source: "remotive" })),
-      ...((results[2].status === "fulfilled" ? results[2].value : []) as { externalId?: string; title: string; company: string; location?: string; url?: string; description: string; salary?: string; source?: string }[]).map(j => ({ ...j, source: "jobicy" })),
-    ];
+    const labels = ["adzuna", "remotive", "jobicy", "arbeitnow"];
+    const allJobs: RawJob[] = [];
+    for (let i = 0; i < SOURCES_COUNT; i++) {
+      const r = results[i];
+      if (r.status === "fulfilled") {
+        (r.value as RawJob[]).forEach((j) => allJobs.push({ ...j, source: labels[i] }));
+      }
+    }
 
-    const created: { id: string; title: string; company: string; source: string }[] = [];
-    for (const j of allJobs) {
+    // Apply 24h filter to sources that don't natively filter (remotive, jobicy)
+    const cutoff = last24h ? Date.now() - 24 * 3600_000 : 0;
+    const filtered = cutoff
+      ? allJobs.filter((j) => !j.postedAt || j.postedAt.getTime() >= cutoff)
+      : allJobs;
+
+    const created: { id: string; title: string; company: string; location?: string; source: string }[] = [];
+    for (const j of filtered) {
       if (!j.description) continue;
       const existing = j.url ? await prisma.job.findFirst({ where: { url: j.url } }) : null;
       if (existing) continue;
@@ -42,14 +68,14 @@ export async function POST(req: NextRequest) {
           source: j.source,
         },
       });
-      created.push({ id: row.id, title: row.title, company: row.company, source: j.source ?? "adzuna" });
+      created.push({ id: row.id, title: row.title, company: row.company, location: row.location ?? undefined, source: j.source ?? "unknown" });
     }
 
     const errors = results
-      .map((r, i) => r.status === "rejected" ? `${["adzuna","remotive","jobicy"][i]}: ${r.reason}` : null)
+      .map((r, i) => r.status === "rejected" ? `${labels[i]}: ${r.reason}` : null)
       .filter(Boolean);
 
-    return NextResponse.json({ created, found: allJobs.length, errors });
+    return NextResponse.json({ created, found: allJobs.length, filtered: filtered.length, errors });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
