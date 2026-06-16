@@ -14,25 +14,16 @@ export default async function SearchPage() {
   return (
     <div>
       <TopNav />
-      <main className="max-w-3xl mx-auto px-6 py-10">
-        <h1 className="display-md" style={{ marginBottom: 6 }}>Find jobs</h1>
-        <p className="body" style={{ color: "var(--ink-muted)", marginBottom: 24 }}>
-          Type a role and location. JobTrackr searches live listings, adds them to your board, and tailors your resume to each one automatically.
-        </p>
-        {!ready && (
-          <div className="card" style={{ padding: 16, marginBottom: 16, borderLeft: "2px solid #ffb86b" }}>
-            <span className="body-sm" style={{ color: "#ffb86b" }}>
-              Add your Adzuna App ID & Key in <Link href="/settings" style={{ color: "var(--primary-hover)", textDecoration: "underline" }}>Settings</Link> first.
-            </span>
-          </div>
-        )}
-        {ready && !resume && (
-          <div className="card" style={{ padding: 16, marginBottom: 16, borderLeft: "2px solid #ffb86b" }}>
-            <span className="body-sm" style={{ color: "#ffb86b" }}>
-              Upload your <Link href="/resume" style={{ color: "var(--primary-hover)", textDecoration: "underline" }}>master resume</Link> so tailoring works.
-            </span>
-          </div>
-        )}
+      <main className="max-w-5xl mx-auto px-6 py-10">
+        <div style={{ marginBottom: 24 }}>
+          <h1 className="display-md" style={{ marginBottom: 6 }}>Find Jobs</h1>
+          <p className="body-sm" style={{ color: "var(--ink-muted)" }}>
+            Search live listings — JobTrackr adds them to your board and tailors your resume automatically.
+            {ready && !resume && (
+              <> <Link href="/resume" style={{ color: "var(--primary)", textDecoration: "underline" }}>Upload your resume</Link> to enable AI tailoring.</>
+            )}
+          </p>
+        </div>
         <SearchClient ready={ready} aiReady={aiReady} />
       </main>
     </div>

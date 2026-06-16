@@ -233,44 +233,73 @@ function daysAgo(iso: string) {
   return d === 0 ? "today" : d === 1 ? "1 day ago" : `${d} days ago`;
 }
 
+function CompanyAvatar({ name }: { name: string }) {
+  const letter = name?.[0]?.toUpperCase() ?? "?";
+  const colors = ["#5e6ad2","#27a6a4","#a084dc","#e86c3a","#2eaadc","#27a644"];
+  const color = colors[(name.charCodeAt(0) ?? 0) % colors.length];
+  return (
+    <div style={{
+      width: 32, height: 32, borderRadius: 8, background: color + "18",
+      border: `1.5px solid ${color}35`, display: "flex", alignItems: "center",
+      justifyContent: "center", flexShrink: 0, color, fontWeight: 700, fontSize: 13,
+    }}>
+      {letter}
+    </div>
+  );
+}
+
 function JobCard({ job, dragging = false }: { job: Job; dragging?: boolean }) {
+  const scoreColor = job.matchScore != null
+    ? job.matchScore >= 75 ? "#16a34a" : job.matchScore >= 50 ? "#d97706" : "var(--ink-subtle)"
+    : null;
+  const scoreBg = job.matchScore != null
+    ? job.matchScore >= 75 ? "#16a34a20" : job.matchScore >= 50 ? "#d9770620" : "var(--surface-2)"
+    : null;
+
   return (
     <Link
       href={`/job/${job.id}`}
       onClick={(e) => dragging && e.preventDefault()}
       className="card block"
       style={{
-        padding: 14,
-        background: dragging ? "var(--surface-2)" : "var(--surface-1)",
-        boxShadow: dragging ? "0 0 0 2px rgba(94,105,210,0.5)" : "none",
+        padding: 12,
+        background: dragging ? "var(--surface-2)" : "var(--canvas)",
+        boxShadow: dragging ? "0 4px 16px rgba(94,105,210,0.2)" : "0 1px 3px rgba(0,0,0,0.04)",
         cursor: dragging ? "grabbing" : "pointer",
+        transition: "box-shadow .12s",
       }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--ink)", marginBottom: 2 }}>
-          {job.title}
+      <div className="flex items-start gap-2" style={{ marginBottom: 8 }}>
+        <CompanyAvatar name={job.company} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {job.title}
+          </div>
+          <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {job.company}
+          </div>
         </div>
         {job.matchScore != null && (
-          <span
-            className="caption"
-            style={{
-              flexShrink: 0, borderRadius: 9999, padding: "1px 8px",
-              background: job.matchScore >= 75 ? "color-mix(in oklab,var(--surface-2),var(--success) 20%)" : job.matchScore >= 50 ? "color-mix(in oklab,var(--surface-2),#c9621f 12%)" : "var(--surface-2)",
-              color: job.matchScore >= 75 ? "var(--success)" : job.matchScore >= 50 ? "#ffb86b" : "var(--ink-subtle)",
-            }}
-          >
+          <span style={{
+            flexShrink: 0, borderRadius: 6, padding: "2px 7px", fontSize: 11, fontWeight: 700,
+            background: scoreBg!, color: scoreColor!,
+          }}>
             {job.matchScore}%
           </span>
         )}
       </div>
-      <div className="caption" style={{ color: "var(--ink-subtle)" }}>
-        {job.company}{job.location ? ` · ${job.location}` : ""}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        {job.location ? (
+          <span style={{ fontSize: 11, color: "var(--ink-tertiary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            📍 {job.location}
+          </span>
+        ) : <span />}
+        {job.appliedAt && (
+          <span style={{ fontSize: 11, color: "var(--ink-tertiary)", whiteSpace: "nowrap", marginLeft: 4 }}>
+            {daysAgo(job.appliedAt)}
+          </span>
+        )}
       </div>
-      {job.appliedAt && (
-        <div className="caption" style={{ color: "var(--ink-tertiary)", marginTop: 6 }}>
-          applied {daysAgo(job.appliedAt)}
-        </div>
-      )}
     </Link>
   );
 }
