@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "JobTrackr Auto-Apply",
+  "version": "1.0.0",
+  "description": "Auto-fills job application forms using your JobTrackr resume and cover letter.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://localhost:3000/*", "https://*/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "JobTrackr Auto-Apply"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

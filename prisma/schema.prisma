@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Job {
+  id           String   @id @default(cuid())
+  title        String
+  company      String
+  location     String?
+  url          String?
+  description  String
+  stage        String   @default("wishlist") // wishlist | applied | interviewing | offer | rejected
+  order        Int      @default(0)
+  notes        String?
+  appliedAt    DateTime?
+  source       String?  // manual | adzuna
+  score        Int?     // cached ATS match score for board display
+  matchScore   Int?     // resume-vs-job fit % (0–100)
+  followUpAt   DateTime? // user-set reminder date
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  kit          GeneratedKit?
+  activity     ActivityLog[]
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  type      String   // email | call | note | stage_change
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model GeneratedKit {
+  id              String   @id @default(cuid())
+  jobId           String   @unique
+  job             Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  coverLetter     String
+  resumeBullets   String   // JSON array of strings
+  interviewQs     String   // JSON array of strings
+  companyBrief    String
+  atsScore        Int
+  atsTips         String   // JSON array of strings
+  gapAnalysis     String   @default("{}") // JSON {matched[], missing[], verdict}
+  tailoredResume  String   // JSON of structured resume
+  createdAt       DateTime @default(now())
+}
+
+model Resume {
+  id         String   @id @default(cuid())
+  isMaster   Boolean  @default(true)
+  name       String
+  email      String?
+  phone      String?
+  location   String?
+  summary    String?
+  skills     String   // JSON array
+  experience String   // JSON array of {company, title, start, end, bullets[]}
+  education  String   // JSON array of {school, degree, year}
+  rawText    String?
+  updatedAt  DateTime @updatedAt
+}
+
+model Settings {
+  id            String  @id @default("singleton")
+  openrouterKey String?
+  model         String  @default("anthropic/claude-sonnet-4")
+  adzunaAppId   String?
+  adzunaAppKey  String?
+  adzunaCountry String  @default("in")
+}

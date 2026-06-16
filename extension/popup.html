@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 320px; font-family: -apple-system, system-ui, sans-serif; background: #010102; color: #f7f8f8; font-size: 13px; }
+  .header { padding: 14px 16px 10px; border-bottom: 1px solid #23252a; display: flex; align-items: center; gap: 8px; }
+  .logo { width: 14px; height: 14px; border-radius: 3px; background: #5e6ad2; flex-shrink: 0; }
+  .title { font-size: 14px; font-weight: 600; letter-spacing: -0.2px; }
+  .section { padding: 14px 16px; border-bottom: 1px solid #23252a; }
+  .label { font-size: 11px; color: #8a8f98; margin-bottom: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
+  .val { color: #d0d6e0; line-height: 1.4; }
+  .val.muted { color: #62666d; font-style: italic; }
+  .btn { display: block; width: 100%; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; text-align: center; margin-bottom: 8px; }
+  .btn-primary { background: #5e6ad2; color: #f7f8f8; }
+  .btn-primary:hover { background: #828fff; }
+  .btn-secondary { background: #0c0d10; color: #f7f8f8; border: 1px solid #23252a; }
+  .btn-secondary:hover { background: #15171b; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .actions { padding: 12px 16px 14px; }
+  .status { padding: 10px 16px; font-size: 12px; border-top: 1px solid #23252a; }
+  .status.ok { color: #27a644; }
+  .status.err { color: #ff7676; }
+  .fields-found { font-size: 11px; color: #62666d; margin-top: 6px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 500; margin-left: 6px; }
+  .badge-green { background: rgba(39,166,68,.15); color: #27a644; }
+  .badge-gray { background: #15171b; color: #62666d; }
+  .url-bar { font-size: 10px; color: #62666d; padding: 6px 16px; border-bottom: 1px solid #23252a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  input[type=url] { background: #0c0d10; border: 1px solid #23252a; border-radius: 6px; color: #f7f8f8; font-size: 12px; padding: 6px 10px; width: 100%; outline: none; margin-bottom: 8px; }
+  input[type=url]:focus { border-color: #5e6ad2; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo"></div>
+  <span class="title">JobTrackr Auto-Apply</span>
+</div>
+<div class="url-bar" id="current-url">Loading…</div>
+
+<div class="section" id="resume-section">
+  <div class="label">Resume on file</div>
+  <div class="val muted" id="resume-name">Not loaded</div>
+</div>
+
+<div class="section" id="cover-section" style="display:none">
+  <div class="label">Cover letter <span class="badge badge-green">ready to paste</span></div>
+  <div class="val" id="cover-preview" style="font-size:11px;color:#8a8f98;max-height:48px;overflow:hidden"></div>
+</div>
+
+<div class="section">
+  <div class="label">JobTrackr URL</div>
+  <input type="url" id="api-url" placeholder="http://localhost:3000" value="http://localhost:3000" />
+  <div class="fields-found" id="fields-found"></div>
+</div>
+
+<div class="actions">
+  <button class="btn btn-primary" id="btn-fill" disabled>Fill form fields</button>
+  <button class="btn btn-secondary" id="btn-copy-cover" style="display:none">Copy cover letter</button>
+  <button class="btn btn-secondary" id="btn-open">Open JobTrackr</button>
+</div>
+
+<div class="status" id="status" style="display:none"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
