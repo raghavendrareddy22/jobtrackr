@@ -10,6 +10,38 @@ const DAY = 86400000;
 export default async function Dashboard() {
   const jobs = await prisma.job.findMany({ orderBy: { updatedAt: "desc" } });
   const now = Date.now();
+  const settings = await prisma.settings.findUnique({ where: { id: "singleton" } });
+  const resume = await prisma.resume.findFirst({ where: { isMaster: true } });
+  const hasApiKey = !!settings?.openrouterKey;
+  const hasResume = !!resume;
+  const hasJobs = jobs.length > 0;
+  const setupDone = hasApiKey && hasResume && hasJobs;
+  const setupSteps = [
+    {
+      done: hasApiKey,
+      num: 1,
+      title: "Add your OpenRouter API key",
+      desc: "Powers AI features: cover letters, resume tailoring, interview prep.",
+      href: "/settings",
+      cta: "Go to Settings →",
+    },
+    {
+      done: hasResume,
+      num: 2,
+      title: "Upload your master resume",
+      desc: "Upload a PDF or DOCX once — JobTrackr tailors it for every job.",
+      href: "/resume",
+      cta: "Upload Resume →",
+    },
+    {
+      done: hasJobs,
+      num: 3,
+      title: "Add your first job",
+      desc: "Search live listings or paste a job URL to start tracking.",
+      href: "/search",
+      cta: "Find Jobs →",
+    },
+  ];
 
   const counts = Object.fromEntries(STAGES.map((s) => [s.id, jobs.filter((j) => j.stage === s.id).length]));
   const total = jobs.length;
@@ -43,14 +75,55 @@ export default async function Dashboard() {
           <h1 className="display-md" style={{ marginTop: 6 }}>Where things stand</h1>
         </div>
 
+        {!setupDone && (
+          <div className="panel" style={{ marginBottom: 28, overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--hairline)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <div className="eyebrow" style={{ color: "var(--primary)", marginBottom: 2 }}>Getting started</div>
+                <div style={{ fontSize: 15, fontWeight: 600 }}>
+                  {setupSteps.filter(s => s.done).length} of 3 steps complete
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                {setupSteps.map(s => (
+                  <div key={s.num} style={{ width: 32, height: 4, borderRadius: 4, background: s.done ? "var(--success)" : "var(--surface-3)" }} />
+                ))}
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+              {setupSteps.map((s, i) => (
+                <div key={s.num} style={{ padding: "20px 24px", borderRight: i < 2 ? "1px solid var(--hairline)" : "none", opacity: s.done ? 0.5 : 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <span style={{
+                      width: 24, height: 24, borderRadius: "50%",
+                      background: s.done ? "var(--success)" : "var(--primary)",
+                      color: "#fff", fontSize: 12, fontWeight: 700,
+                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                    }}>
+                      {s.done ? "✓" : s.num}
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 600 }}>{s.title}</span>
+                  </div>
+                  <p className="body-sm" style={{ color: "var(--ink-muted)", marginBottom: 14, lineHeight: 1.5 }}>{s.desc}</p>
+                  {!s.done && (
+                    <Link href={s.href} style={{ fontSize: 13, fontWeight: 600, color: "var(--primary)" }}>{s.cta}</Link>
+                  )}
+                  {s.done && <span style={{ fontSize: 12, color: "var(--success)", fontWeight: 600 }}>✓ Done</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {total === 0 ? (
           <div className="panel" style={{ padding: 48, textAlign: "center" }}>
-            <div className="card-title" style={{ marginBottom: 8 }}>No jobs yet</div>
-            <p className="body" style={{ color: "var(--ink-muted)", marginBottom: 20 }}>
-              Search live listings or add one by hand to start tracking.
+            <div style={{ fontSize: 40, marginBottom: 16 }}>👋</div>
+            <div className="card-title" style={{ marginBottom: 8 }}>Welcome to JobTrackr</div>
+            <p className="body" style={{ color: "var(--ink-muted)", marginBottom: 8, maxWidth: 380, margin: "0 auto 24px" }}>
+              Complete the setup above, then search live job listings or add a job manually to start tracking your applications.
             </p>
             <div className="flex items-center justify-center gap-2">
-              <Link href="/search" className="btn-primary">Find jobs</Link>
+              <Link href="/search" className="btn-primary">🔍 Find jobs</Link>
               <Link href="/job/new" className="btn-secondary">Add manually</Link>
             </div>
           </div>

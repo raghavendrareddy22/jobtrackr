@@ -15,7 +15,7 @@ export default async function BoardPage() {
           <div>
             <h1 className="display-md">Pipeline</h1>
             <p className="body-sm" style={{ color: "var(--ink-subtle)", marginTop: 4 }}>
-              {jobs.length} job{jobs.length === 1 ? "" : "s"} tracked
+              {jobs.length === 0 ? "No jobs yet — add your first one →" : `${jobs.length} job${jobs.length === 1 ? "" : "s"} tracked · drag cards to move stages`}
             </p>
           </div>
           <div className="flex items-center gap-2">

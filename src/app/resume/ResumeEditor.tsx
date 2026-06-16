@@ -58,16 +58,21 @@ export function ResumeEditor({ initial }: { initial: R | null }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="panel" style={{ padding: 32 }}>
-        <div className="eyebrow" style={{ color: "var(--ink-subtle)", marginBottom: 12 }}>Upload</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+          <div>
+            <div className="eyebrow" style={{ color: "var(--ink-subtle)" }}>Upload your resume</div>
+            <p className="caption" style={{ color: "var(--ink-muted)", marginTop: 4 }}>AI will extract your info automatically. You can edit anything after.</p>
+          </div>
+        </div>
         <label
           style={{
             display: "block",
-            border: "1px dashed var(--hairline-strong)",
+            border: "2px dashed var(--primary)",
             borderRadius: 12,
-            padding: 24,
+            padding: "32px 24px",
             textAlign: "center",
             cursor: "pointer",
-            color: "var(--ink-muted)",
+            background: "color-mix(in oklab, var(--surface-1), var(--primary) 5%)",
           }}
         >
           <input
@@ -76,9 +81,21 @@ export function ResumeEditor({ initial }: { initial: R | null }) {
             style={{ display: "none" }}
             onChange={(e) => e.target.files?.[0] && onUpload(e.target.files[0])}
           />
-          {uploading ? "Parsing…" : "Click to upload PDF, DOCX, or TXT"}
+          {uploading ? (
+            <div>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
+              <div style={{ fontWeight: 600, color: "var(--primary)" }}>Parsing your resume…</div>
+              <div className="caption" style={{ color: "var(--ink-muted)", marginTop: 4 }}>AI is extracting your info</div>
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>📄</div>
+              <div style={{ fontWeight: 600, color: "var(--ink)" }}>Click to upload your resume</div>
+              <div className="caption" style={{ color: "var(--ink-muted)", marginTop: 4 }}>PDF, DOCX, or TXT · AI fills in the fields below</div>
+            </div>
+          )}
         </label>
-        {error && <div className="caption" style={{ color: "#ff7676", marginTop: 12 }}>{error}</div>}
+        {error && <div className="caption" style={{ color: "#ff7676", marginTop: 12 }}>❌ {error}</div>}
       </div>
 
       <div className="panel" style={{ padding: 32 }}>

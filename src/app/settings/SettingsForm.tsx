@@ -36,24 +36,59 @@ export function SettingsForm({ initial }: { initial: Init }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="panel flex flex-col gap-5" style={{ padding: 32 }}>
-        <div className="eyebrow" style={{ color: "var(--ink-subtle)" }}>AI — OpenRouter</div>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <div className="eyebrow" style={{ color: "var(--ink-subtle)" }}>AI — OpenRouter</div>
+            <p className="body-sm" style={{ color: "var(--ink-muted)", marginTop: 4 }}>
+              Powers cover letters, resume tailoring, interview prep, and match scoring.
+            </p>
+          </div>
+          <a
+            href="https://openrouter.ai/keys"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 12, fontWeight: 600, color: "var(--primary)", whiteSpace: "nowrap", marginTop: 4 }}
+          >
+            Get free key →
+          </a>
+        </div>
         <label>
           <span className="caption" style={{ color: "var(--ink-subtle)", display: "block", marginBottom: 4 }}>API key</span>
-          <input className="input" type="password" placeholder="sk-or-…" value={v.openrouterKey} onChange={(e) => setV({ ...v, openrouterKey: e.target.value })} />
-          <span className="caption" style={{ color: "var(--ink-tertiary)", display: "block", marginTop: 6 }}>Get one at openrouter.ai/keys</span>
+          <input className="input" type="password" placeholder="sk-or-v1-…   (paste your key here)" value={v.openrouterKey} onChange={(e) => setV({ ...v, openrouterKey: e.target.value })} />
+          <span className="caption" style={{ color: "var(--ink-tertiary)", display: "block", marginTop: 6 }}>
+            Sign up free at openrouter.ai → Keys → Create key. Free credits included.
+          </span>
         </label>
         <label>
-          <span className="caption" style={{ color: "var(--ink-subtle)", display: "block", marginBottom: 4 }}>Model</span>
+          <span className="caption" style={{ color: "var(--ink-subtle)", display: "block", marginBottom: 4 }}>AI Model</span>
           <select className="input" value={v.model} onChange={(e) => setV({ ...v, model: e.target.value })} style={{ appearance: "none" }}>
             {MODELS.map((m) => <option key={m} value={m}>{m}</option>)}
           </select>
+          <span className="caption" style={{ color: "var(--ink-tertiary)", display: "block", marginTop: 6 }}>
+            Claude Sonnet is recommended — fast, affordable, great at writing.
+          </span>
         </label>
       </div>
 
       <div className="panel flex flex-col gap-5" style={{ padding: 32 }}>
-        <div className="eyebrow" style={{ color: "var(--ink-subtle)" }}>Job search — Adzuna</div>
-        <div className="body-sm" style={{ color: "var(--ink-muted)", marginTop: -8 }}>
-          Free for personal use. Register at developer.adzuna.com → create an app → copy the App ID and App Key.
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <div>
+            <div className="eyebrow" style={{ color: "var(--ink-subtle)" }}>Job search — Adzuna</div>
+            <p className="body-sm" style={{ color: "var(--ink-muted)", marginTop: 4 }}>
+              Enables live job listings in Find Jobs. Free for personal use.
+            </p>
+          </div>
+          <a
+            href="https://developer.adzuna.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 12, fontWeight: 600, color: "var(--primary)", whiteSpace: "nowrap", marginTop: 4 }}
+          >
+            Register free →
+          </a>
+        </div>
+        <div className="body-sm" style={{ color: "var(--ink-muted)", marginTop: -8, padding: "10px 14px", background: "var(--surface-2)", borderRadius: 8 }}>
+          📋 <strong>How to get keys:</strong> Go to developer.adzuna.com → Sign up → &quot;Create an App&quot; → copy the App ID and Key from your dashboard.
         </div>
         <div className="grid grid-cols-2 gap-3">
           <label>

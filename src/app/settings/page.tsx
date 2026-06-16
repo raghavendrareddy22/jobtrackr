@@ -12,7 +12,7 @@ export default async function SettingsPage() {
       <main className="max-w-2xl mx-auto px-6 py-10">
         <h1 className="display-md" style={{ marginBottom: 6 }}>Settings</h1>
         <p className="body" style={{ color: "var(--ink-muted)", marginBottom: 32 }}>
-          Your OpenRouter API key is stored locally in the app database.
+          Connect your API keys to unlock AI features and live job search. Your keys are stored only in your database.
         </p>
         <SettingsForm
           initial={{
