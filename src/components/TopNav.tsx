@@ -2,12 +2,9 @@ import Link from "next/link";
 import { SignOut } from "./SignOut";
 
 const LINKS = [
-  { href: "/", label: "Dashboard", icon: "⬛", tip: "Your pipeline overview" },
-  { href: "/board", label: "Board", icon: "📋", tip: "Kanban view of all jobs" },
-  { href: "/search", label: "Find Jobs", icon: "🔍", tip: "Search live listings" },
-  { href: "/resume", label: "Resume", icon: "📄", tip: "Your master resume" },
-  { href: "/answers", label: "Answers", icon: "💬", tip: "Practice Q&A" },
-  { href: "/simulate", label: "Simulate", icon: "🎯", tip: "Mock interview" },
+  { href: "/board", label: "Board" },
+  { href: "/search", label: "Find Jobs" },
+  { href: "/resume", label: "Resume" },
 ];
 
 export function TopNav({ active }: { active?: string }) {
@@ -15,55 +12,60 @@ export function TopNav({ active }: { active?: string }) {
     <nav
       className="sticky top-0 z-30 flex items-center justify-between px-6"
       style={{
-        height: 56,
+        height: 52,
         background: "var(--canvas)",
         borderBottom: "1px solid var(--hairline)",
       }}
     >
-      <div className="flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-2" title="Go to dashboard">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-            <rect width="20" height="20" rx="5" fill="var(--primary)" />
-            <path d="M5 10h10M10 5v10" stroke="white" strokeWidth="2" strokeLinecap="round" />
+      <div className="flex items-center gap-8">
+        <Link href="/board" className="flex items-center gap-2">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect width="22" height="22" rx="6" fill="#5e6ad2" />
+            <path d="M6 11h10M11 6v10" stroke="white" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>JobTrackr</span>
+          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.4, color: "var(--ink)" }}>JobTrackr</span>
         </Link>
         <div className="flex items-center gap-1">
-          {LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="body-sm"
-              title={l.tip}
-              style={{
-                padding: "6px 10px",
-                borderRadius: 8,
-                color: active === l.href ? "var(--ink)" : "var(--ink-subtle)",
-                background: active === l.href ? "var(--surface-2)" : "transparent",
-                fontWeight: active === l.href ? 600 : 500,
-                transition: "background .12s, color .12s",
-              }}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {LINKS.map((l) => {
+            const isActive = active === l.href;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                style={{
+                  padding: "5px 12px",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? "var(--ink)" : "var(--ink-subtle)",
+                  background: isActive ? "var(--surface-2)" : "transparent",
+                  textDecoration: "none",
+                  transition: "background .1s, color .1s",
+                }}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
-      <div className="flex items-center gap-2">
+
+      <div className="flex items-center gap-3">
         <Link
           href="/settings"
-          title="API keys & settings"
+          title="Settings"
           style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 500,
-            color: "var(--ink-subtle)", border: "1px solid var(--hairline)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 32, height: 32, borderRadius: 8,
+            color: active === "/settings" ? "var(--ink)" : "var(--ink-subtle)",
             background: active === "/settings" ? "var(--surface-2)" : "transparent",
+            border: "1px solid var(--hairline)",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm0 2a3 3 0 100 6 3 3 0 000-6z" fill="currentColor" fillRule="evenodd" />
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.8"/>
+            <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
           </svg>
-          Settings
         </Link>
         <SignOut />
       </div>

@@ -13,15 +13,15 @@ export default async function SearchPage() {
 
   return (
     <div>
-      <TopNav />
-      <main className="max-w-5xl mx-auto px-6 py-10">
-        <div style={{ marginBottom: 24 }}>
-          <h1 className="display-md" style={{ marginBottom: 6 }}>Find Jobs</h1>
-          <p className="body-sm" style={{ color: "var(--ink-muted)" }}>
-            Search live listings — JobTrackr adds them to your board and tailors your resume automatically.
-            {ready && !resume && (
-              <> <Link href="/resume" style={{ color: "var(--primary)", textDecoration: "underline" }}>Upload your resume</Link> to enable AI tailoring.</>
-            )}
+      <TopNav active="/search" />
+      <main className="max-w-4xl mx-auto px-6 py-10">
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.6, marginBottom: 6 }}>Find Jobs</h1>
+          <p style={{ fontSize: 14, color: "var(--ink-muted)" }}>
+            Search live listings from 4 job boards.{" "}
+            {!resume && <Link href="/resume" style={{ color: "var(--primary)" }}>Upload your resume</Link>}
+            {resume && !aiReady && <Link href="/settings" style={{ color: "var(--primary)" }}>Add an OpenRouter key</Link>}
+            {resume && !aiReady && " to enable AI tailoring."}
           </p>
         </div>
         <SearchClient ready={ready} aiReady={aiReady} />

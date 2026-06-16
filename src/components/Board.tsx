@@ -181,8 +181,8 @@ function Column({ id, label, jobs, selectMode, selected, onToggle }: {
           )
         ))}
         {jobs.length === 0 && (
-          <div className="caption" style={{ color: "var(--ink-tertiary)", border: "1px dashed var(--hairline)", borderRadius: 8, padding: 12, textAlign: "center" }}>
-            Drop here
+          <div style={{ color: "var(--ink-tertiary)", border: "1.5px dashed var(--hairline)", borderRadius: 10, padding: "20px 12px", textAlign: "center", fontSize: 12 }}>
+            Drop a card here
           </div>
         )}
       </div>
