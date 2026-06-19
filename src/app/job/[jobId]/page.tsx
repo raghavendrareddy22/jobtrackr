@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import { prisma } from "@/lib/db";
 import { deserializeKit } from "@/lib/kit";
 import { JobDetailClient } from "./JobDetailClient";
@@ -15,10 +15,9 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
   const kit = job.kit ? deserializeKit(job.kit) : null;
 
   return (
-    <div>
-      <TopNav />
+    <AppShell active="/board">
       <main className="max-w-6xl mx-auto px-6 py-10">
-        <Link href="/" className="caption" style={{ color: "var(--ink-subtle)" }}>← Pipeline</Link>
+        <Link href="/board" className="caption" style={{ color: "var(--ink-subtle)" }}>← Board</Link>
         <JobDetailClient
           job={{
             id: job.id,
@@ -37,6 +36,6 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
           hasResume={!!resume}
         />
       </main>
-    </div>
+    </AppShell>
   );
 }

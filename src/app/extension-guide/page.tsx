@@ -1,4 +1,4 @@
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import Link from "next/link";
 
 const STEPS = [
@@ -46,8 +46,7 @@ const PLATFORMS = [
 
 export default function ExtensionGuidePage() {
   return (
-    <div>
-      <TopNav />
+    <AppShell active="/extension-guide">
       <main className="max-w-3xl mx-auto px-6 py-10">
         <div style={{ marginBottom: 32 }}>
           <div className="eyebrow" style={{ color: "var(--primary)", marginBottom: 6 }}>Chrome Extension</div>
@@ -119,6 +118,6 @@ export default function ExtensionGuidePage() {
           <Link href="/board" className="btn-secondary">View board</Link>
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }

@@ -1,4 +1,4 @@
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import { prisma } from "@/lib/db";
 import { SimulatorClient } from "./SimulatorClient";
 
@@ -12,8 +12,7 @@ export default async function SimulatePage() {
   });
 
   return (
-    <div>
-      <TopNav active="/simulate" />
+    <AppShell active="/simulate">
       <main className="max-w-5xl mx-auto px-6 py-10">
         <div className="eyebrow" style={{ color: "var(--primary-hover)", marginBottom: 6 }}>AI studio</div>
         <h1 className="display-md">Interview simulator</h1>
@@ -22,6 +21,6 @@ export default async function SimulatePage() {
         </p>
         <SimulatorClient jobs={jobs} />
       </main>
-    </div>
+    </AppShell>
   );
 }

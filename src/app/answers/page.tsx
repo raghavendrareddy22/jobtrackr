@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import { prisma } from "@/lib/db";
 import { AnswerStudio } from "./AnswerStudio";
 
@@ -8,8 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function AnswersPage() {
   const resume = await prisma.resume.findFirst({ where: { isMaster: true } });
   return (
-    <div>
-      <TopNav active="/answers" />
+    <AppShell active="/answers">
       <main className="max-w-5xl mx-auto px-6 py-10">
         <div className="eyebrow" style={{ color: "var(--primary-hover)", marginBottom: 6 }}>AI studio</div>
         <h1 className="display-md">Answer Studio</h1>
@@ -25,6 +24,6 @@ export default async function AnswersPage() {
         )}
         <AnswerStudio hasResume={!!resume} />
       </main>
-    </div>
+    </AppShell>
   );
 }

@@ -1,4 +1,4 @@
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import { getSettings } from "@/lib/openrouter";
 import { SettingsForm } from "./SettingsForm";
 
@@ -7,8 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage() {
   const s = await getSettings();
   return (
-    <div>
-      <TopNav />
+    <AppShell active="/settings">
       <main className="max-w-2xl mx-auto px-6 py-10">
         <h1 className="display-md" style={{ marginBottom: 6 }}>Settings</h1>
         <p className="body" style={{ color: "var(--ink-muted)", marginBottom: 32 }}>
@@ -24,6 +23,6 @@ export default async function SettingsPage() {
           }}
         />
       </main>
-    </div>
+    </AppShell>
   );
 }

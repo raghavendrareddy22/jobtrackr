@@ -87,10 +87,10 @@ html, body {
   .display-md { font-size: 28px; letter-spacing: -0.5px; }
   .display-xl, .display-lg { font-size: 36px; }
 
-  nav.sticky { height: auto; flex-wrap: wrap; padding: 10px 16px; gap: 10px; }
-  nav.sticky > div:first-child { flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; }
-  nav.sticky > div:first-child > div { flex-wrap: wrap; }
-  nav.sticky > div:last-child { width: 100%; justify-content: flex-end; }
+  /* Collapse the sidebar to an icon rail on small screens */
+  aside { width: 64px !important; }
+  aside span { display: none; }
+  aside a, aside div { padding-left: 0 !important; padding-right: 0 !important; justify-content: center !important; }
 
   main { padding-left: 16px !important; padding-right: 16px !important; }
 

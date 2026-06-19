@@ -1,11 +1,10 @@
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import { NewJobForm } from "./NewJobForm";
 import Link from "next/link";
 
 export default function NewJobPage() {
   return (
-    <div>
-      <TopNav />
+    <AppShell active="/board">
       <main className="max-w-3xl mx-auto px-6 py-10">
         <Link href="/" className="caption" style={{ color: "var(--ink-subtle)" }}>← Back to pipeline</Link>
         <h1 className="display-md" style={{ marginTop: 8, marginBottom: 6 }}>Add a job</h1>
@@ -14,6 +13,6 @@ export default function NewJobPage() {
         </p>
         <NewJobForm />
       </main>
-    </div>
+    </AppShell>
   );
 }

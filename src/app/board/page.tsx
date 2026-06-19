@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import { Board } from "@/components/Board";
 import { prisma } from "@/lib/db";
 import { STAGES } from "@/lib/stages";
@@ -13,8 +13,7 @@ export default async function BoardPage() {
   const interviews = jobs.filter((j) => j.stage === "interviewing" || j.stage === "offer").length;
 
   return (
-    <div>
-      <TopNav active="/board" />
+    <AppShell active="/board">
       <main className="pt-6">
 
         {/* Header */}
@@ -62,7 +61,7 @@ export default async function BoardPage() {
           />
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }
 

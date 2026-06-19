@@ -1,4 +1,4 @@
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/AppShell";
 import { prisma } from "@/lib/db";
 import { SearchClient } from "./SearchClient";
 import Link from "next/link";
@@ -12,8 +12,7 @@ export default async function SearchPage() {
   const aiReady = !!s?.openrouterKey;
 
   return (
-    <div>
-      <TopNav active="/search" />
+    <AppShell active="/search">
       <main className="max-w-4xl mx-auto px-6 py-10">
         <div style={{ marginBottom: 32 }}>
           <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.6, marginBottom: 6 }}>Find Jobs</h1>
@@ -26,6 +25,6 @@ export default async function SearchPage() {
         </div>
         <SearchClient ready={ready} aiReady={aiReady} />
       </main>
-    </div>
+    </AppShell>
   );
 }
