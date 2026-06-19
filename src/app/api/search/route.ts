@@ -52,18 +52,40 @@ export async function POST(req: NextRequest) {
       ? allJobs.filter((j) => !j.postedAt || j.postedAt.getTime() >= cutoff)
       : allJobs;
 
-    const created: { id: string; title: string; company: string; location?: string; source: string }[] = [];
+    // Dedupe identical postings re-listed per city: group by normalized title+company,
+    // merge their locations into one entry instead of creating N near-identical board cards.
+    const groups = new Map<string, { job: RawJob; locations: Set<string> }>();
     for (const j of filtered) {
       if (!j.description) continue;
+      const key = `${j.title.trim().toLowerCase()}::${j.company.trim().toLowerCase()}`;
+      const existing = groups.get(key);
+      if (existing) {
+        if (j.location) existing.locations.add(j.location);
+      } else {
+        groups.set(key, { job: j, locations: new Set(j.location ? [j.location] : []) });
+      }
+    }
+
+    const created: { id: string; title: string; company: string; location?: string; source: string }[] = [];
+    for (const { job: j, locations } of groups.values()) {
       const existing = j.url ? await prisma.job.findFirst({ where: { url: j.url } }) : null;
       if (existing) continue;
+      const locList = [...locations];
+      const location = locList.length === 0
+        ? null
+        : locList.length === 1
+        ? locList[0]
+        : `${locList[0]} +${locList.length - 1} more location${locList.length > 2 ? "s" : ""}`;
+      const description = locList.length > 1
+        ? `${j.description}\n\n[Open in ${locList.length} locations: ${locList.join(", ")}]`
+        : j.description;
       const row = await prisma.job.create({
         data: {
           title: j.title,
           company: j.company,
-          location: j.location || null,
+          location,
           url: j.url || null,
-          description: j.salary ? `${j.description}\n\n[Listed salary: ${j.salary}]` : j.description,
+          description: j.salary ? `${description}\n\n[Listed salary: ${j.salary}]` : description,
           stage: "wishlist",
           source: j.source,
         },
