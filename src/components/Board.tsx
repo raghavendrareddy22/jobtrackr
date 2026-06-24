@@ -30,6 +30,7 @@ export function Board({ initialJobs }: { initialJobs: Job[] }) {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [tailorProgress, setTailorProgress] = useState<{ done: number; total: number } | null>(null);
 
   const byStage = (id: StageId) => jobs.filter((j) => j.stage === id);
   const dragJob = dragId ? jobs.find((j) => j.id === dragId) : null;
@@ -68,6 +69,34 @@ export function Board({ initialJobs }: { initialJobs: Job[] }) {
     }
   }
 
+  async function tailorAll() {
+    const ids = [...selected];
+    if (!ids.length) return;
+    setBulkBusy(true);
+    setTailorProgress({ done: 0, total: ids.length });
+    const CONCURRENCY = 4;
+    let done = 0;
+    let i = 0;
+    async function worker() {
+      while (i < ids.length) {
+        const id = ids[i++];
+        try {
+          const res = await fetch(`/api/kit/${id}`, { method: "POST" });
+          const kit = await res.json();
+          if (res.ok && kit.atsScore != null) {
+            setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, score: kit.atsScore } : j)));
+          }
+        } catch { /* skip on failure, move to next */ }
+        done++;
+        setTailorProgress({ done, total: ids.length });
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, ids.length) }, worker));
+    setBulkBusy(false);
+    setTailorProgress(null);
+    exitSelect();
+  }
+
   function onDragStart(e: DragStartEvent) {
     if (selectMode) return;
     setDragId(String(e.active.id));
@@ -88,6 +117,14 @@ export function Board({ initialJobs }: { initialJobs: Job[] }) {
 
   return (
     <div>
+      {tailorProgress && (
+        <div style={{ height: 3, background: "var(--surface-3)", margin: "0 24px 4px" }}>
+          <div style={{
+            height: "100%", background: "#5e6ad2", transition: "width .2s",
+            width: `${(tailorProgress.done / tailorProgress.total) * 100}%`,
+          }} />
+        </div>
+      )}
       <div className="flex items-center gap-3 px-6 pb-4">
         {!selectMode ? (
           <button className="btn-secondary caption" style={{ padding: "5px 12px" }} onClick={() => setSelectMode(true)}>
@@ -99,6 +136,17 @@ export function Board({ initialJobs }: { initialJobs: Job[] }) {
               {selected.size} selected
             </span>
             <div className="flex gap-2 flex-wrap">
+              <button
+                className="caption"
+                style={{
+                  padding: "5px 12px", borderRadius: 8, fontWeight: 600,
+                  background: "#5e6ad2", color: "#fff", border: "1px solid #5e6ad2",
+                }}
+                disabled={bulkBusy || !selected.size}
+                onClick={tailorAll}
+              >
+                {tailorProgress ? `⚡ Tailoring ${tailorProgress.done}/${tailorProgress.total}…` : "⚡ Tailor All"}
+              </button>
               {STAGES.map((s) => (
                 <button
                   key={s.id}
